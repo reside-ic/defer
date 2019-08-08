@@ -19,8 +19,6 @@ check:
 check_all:
 	${RSCRIPT} -e "rcmdcheck::rcmdcheck(args = c('--as-cran', '--no-manual'))"
 
-vignettes/%.Rmd: vignettes/src/%.R
-	${RSCRIPT} -e 'library(sowsear); sowsear("$<", output="$@")'
 
 ## This will eventually swap out for devtools::build_vignettes(), but
 ## in current version it's not working when offline.  For now I'll
@@ -32,5 +30,11 @@ vignettes: vignettes/orderly.Rmd
 
 tests/testthat/montagu-reports:
 	git clone git@github.com:vimc/montagu-reports $@
+
+
+README.md: README.Rmd
+	Rscript -e "options(warnPartialMatchArgs=FALSE); knitr::knit('$<')"
+	sed -i.bak 's/[[:space:]]*$$//' README.md
+	rm -f $@.bak
 
 .PHONY: test roxygen install build check check_all vignettes
