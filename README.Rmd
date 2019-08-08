@@ -11,7 +11,7 @@ Proof-of-concept for collecting up errors from a code block and throwing them at
 ```{r, error = TRUE}
 check_positive <- function(x) {
   if (x < 0) {
-    deferrable_error(paste("got a negative number:", x))
+    defer::deferrable_error(paste("got a negative number:", x))
   }
 }
 
