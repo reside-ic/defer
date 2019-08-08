@@ -1,0 +1,16 @@
+Package: defer
+Title: Defer Errors
+Version: 0.1.0
+Authors@R: c(person("Rich", "FitzJohn", role = c("aut", "cre"),
+                    email = "rich.fitzjohn@gmail.com"),
+             person("Imperial College of Science, Technology and Medicine",
+                    role = "cph"))
+Description: Create errors that can be deferred until later.  With
+    deferrable errors, collections of errors that are not immediately
+    fatal can be collected and reported back at once.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Suggests:
+    testthat
+RoxygenNote: 6.1.1
