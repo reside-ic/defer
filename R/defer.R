@@ -99,9 +99,6 @@ defer_errors <- function(expr, handler = stop) {
     },
     deferred_errors_flush = function(e) {
       return(deferred_errors(errors, handler, calls))
-    },
-    clear_errors = function(e) {
-      errors <<- list()
     })
 
   deferred_errors(errors, handler, calls, value)
