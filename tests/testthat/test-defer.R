@@ -93,3 +93,28 @@ test_that("final handling", {
   expect_is(err, "deferred_errors")
   expect_equal(length(err$errors), 2)
 })
+
+
+test_that("traceback", {
+  f <- function(x) {
+    g(x)
+  }
+  g <- function(x) {
+    check_positive(x)
+  }
+  err <- defer_errors({
+    f(0)
+    f(-1)
+    f(-2)
+  }, handler = return)
+
+  expect_equal(
+    err$errors[[1]]$calls,
+    list(quote(f(-1)),
+         quote(g(x)),
+         quote(check_positive(x)),
+         quote(deferrable_error(paste("got a negative number:", x)))))
+  expect_equal(
+    err$errors[[1]]$call,
+    quote(check_positive(x)))
+})

@@ -62,20 +62,24 @@ deferrable_error <- function(message) {
 defer_errors <- function(expr, handler = stop) {
   errors <- list()
 
+  calls <- sys.calls()
   value <- withCallingHandlers(
     expr,
     deferrable_error = function(e) {
+      if (identical(calls[], e$calls[seq_along(calls)])) {
+        e$calls <- e$calls[-seq_len(length(calls) + 1)]
+      }
       errors <<- c(errors, list(e))
       invokeRestart("continue_deferrable_error")
     },
     deferred_errors_flush = function(e) {
-      return(deferred_errors(errors, handler))
+      return(deferred_errors(errors, handler, calls))
     },
     clear_errors = function(e) {
       errors <<- list()
     })
 
-  deferred_errors(errors, handler, value)
+  deferred_errors(errors, handler, calls, value)
 }
 
 
@@ -103,7 +107,7 @@ deferred_errors_flush <- function() {
 }
 
 
-deferred_errors <- function(errors, handler, value = NULL) {
+deferred_errors <- function(errors, handler, calls, value = NULL) {
   if (length(errors) > 0L) {
     errs <- vapply(errors, "[[", character(1), "message")
     msg <- sprintf("%d %s occured:\n%s",
