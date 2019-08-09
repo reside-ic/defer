@@ -58,3 +58,27 @@ test_that("invoke restart", {
   expect_equal(x, 1)
   expect_equal(value, 2)
 })
+
+
+test_that("flush stops continued execution", {
+  err <- capture_error(defer_errors({
+    check_positive(-1)
+    deferred_errors_flush()
+    check_positive(-2)
+  }))
+  expect_is(err, "deferred_errors")
+  expect_equal(length(err$errors), 1)
+  expect_equal(err$errors[[1]]$message, "got a negative number: -1")
+})
+
+
+test_that("flush before errors is a noop", {
+  err <- capture_error(defer_errors({
+    check_positive(0)
+    deferred_errors_flush()
+    check_positive(-1)
+    check_positive(-2)
+  }))
+  expect_is(err, "deferred_errors")
+  expect_equal(length(err$errors), 2)
+})

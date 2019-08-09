@@ -2,3 +2,4 @@
 
 export(defer_errors)
 export(deferrable_error)
+export(deferred_errors_flush)

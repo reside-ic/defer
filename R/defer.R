@@ -11,7 +11,7 @@
 ##' # Create a deferrable error and continue from it:
 ##' value <- withCallingHandlers({
 ##'    x <- 1
-##'    deferrable_error("a deferrable error")
+##'    defer::deferrable_error("a deferrable error")
 ##'    x * 2
 ##'  },
 ##'  deferrable_error = function(e)
@@ -29,6 +29,20 @@ deferrable_error <- function(message) {
 ##' @title Run a block of code, collecting deferrable errors
 ##' @param expr An expression to evaluate
 ##' @export
+##' @examples
+##' check_positive <- function(x) {
+##'   if (x < 0) {
+##'     deferrable_error(paste("got a negative number:", x))
+##'   }
+##' }
+##' err <- tryCatch(
+##'   defer::defer_errors({
+##'     check_positive(0)
+##'     check_positive(-1)
+##'     check_positive(-2)
+##'   }),
+##'   error = identity)
+##' err
 defer_errors <- function(expr) {
   errors <- list()
 
@@ -37,8 +51,45 @@ defer_errors <- function(expr) {
     deferrable_error = function(e) {
       errors <<- c(errors, list(e))
       invokeRestart("continue_deferrable_error")
+    },
+    deferred_errors_flush = function(e) {
+      deferred_errors(errors)
+    },
+    clear_errors = function(e) {
+      errors <<- list()
     })
 
+  deferred_errors(errors, value)
+
+  value
+}
+
+
+##' Within a \code{\link{defer_errors}} block, flush any deferred
+##' errors, turning them into realised errors.  If no deferrable
+##' errors have occured, this function has no effect.
+##' @title Flush deferred errors
+##' @export
+##' @examples
+##' check_positive <- function(x) {
+##'   if (x < 0) {
+##'     deferrable_error(paste("got a negative number:", x))
+##'   }
+##' }
+##' err <- tryCatch(
+##'   defer::defer_errors({
+##'     check_positive(-1)
+##'     defer::deferred_errors_flush()
+##'     check_positive(-2)
+##'   }),
+##'   error = identity)
+##' err
+deferred_errors_flush <- function() {
+  condition("deferred_errors_flush")
+}
+
+
+deferred_errors <- function(errors, value = NULL) {
   if (length(errors) > 0L) {
     errs <- vapply(errors, "[[", character(1), "message")
     msg <- sprintf("%d %s occured:\n%s",
@@ -49,8 +100,6 @@ defer_errors <- function(expr) {
     class(err) <- c("deferred_errors", "error", "condition")
     stop(err)
   }
-
-  value
 }
 
 
@@ -58,4 +107,9 @@ error <- function(message, class, ...) {
   ret <- list(message = message, ...)
   class(ret) <- c(class, "error", "condition")
   ret
+}
+
+
+condition <- function(class) {
+  signalCondition(structure(list(), class = c(class, "condition")))
 }

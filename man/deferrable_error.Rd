@@ -21,7 +21,7 @@ tryCatch(
 # Create a deferrable error and continue from it:
 value <- withCallingHandlers({
    x <- 1
-   deferrable_error("a deferrable error")
+   defer::deferrable_error("a deferrable error")
    x * 2
  },
  deferrable_error = function(e)
