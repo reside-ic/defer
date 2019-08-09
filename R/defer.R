@@ -131,12 +131,7 @@ deferred_errors_flush <- function() {
 
 deferred_errors <- function(errors, handler, calls, value = NULL) {
   if (length(errors) > 0L) {
-    errs <- vapply(errors, "[[", character(1), "message")
-    msg <- sprintf("%d %s occured:\n%s",
-                   length(errors),
-                   ngettext(length(errors), "error", "errors"),
-                   paste0("  - ", errs, collapse = "\n"))
-    err <- list(message = msg, errors = errors, value = value)
+    err <- list(errors = errors, value = value)
     class(err) <- c("deferred_errors", "error", "condition")
     handler(err)
   } else {
@@ -154,4 +149,15 @@ error <- function(message, class, ...) {
 
 condition <- function(class) {
   signalCondition(structure(list(), class = c(class, "condition")))
+}
+
+
+##' @export
+conditionMessage.deferred_errors <- function(c) {
+  errors <- vapply(c$errors, "[[", character(1), "message")
+  n <- length(errors)
+  sprintf("%d %s occured:\n%s",
+          n,
+          ngettext(n, "error", "errors"),
+          paste0("  - ", errors, collapse = "\n"))
 }

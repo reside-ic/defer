@@ -28,7 +28,7 @@ test_that("defer_errors can defer errors", {
   expect_length(err$errors, 2)
   expect_is(err$errors[[1]], "deferrable_error")
   expect_is(err$errors[[2]], "deferrable_error")
-  expect_match(err$message, "2 errors occured")
+  expect_match(conditionMessage(err), "2 errors occured")
 })
 
 
@@ -42,7 +42,7 @@ test_that("defer_errors throws on undeferrable errors", {
 
   expect_false(inherits(err, "deferred_errors"))
   expect_is(err, "simpleError")
-  expect_match(err$message, "fatal error")
+  expect_match(conditionMessage(err), "fatal error")
 })
 
 
