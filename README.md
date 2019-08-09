@@ -29,6 +29,8 @@ defer::defer_errors({
 ##   - got a negative number: -2
 ```
 
+For more information see [our blog post](https://reside-ic.github.io/blog/deferring-errors-with-r/)
+
 ## Installation
 
 For now, install directly from github
