@@ -82,3 +82,14 @@ test_that("flush before errors is a noop", {
   expect_is(err, "deferred_errors")
   expect_equal(length(err$errors), 2)
 })
+
+
+test_that("final handling", {
+  err <- defer_errors({
+    check_positive(0)
+    check_positive(-1)
+    check_positive(-2)
+  }, handler = return)
+  expect_is(err, "deferred_errors")
+  expect_equal(length(err$errors), 2)
+})

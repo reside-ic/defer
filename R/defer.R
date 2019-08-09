@@ -1,6 +1,8 @@
 ##' Create an error that will stop immediately, or can be continued from.
 ##' @title Create a deferrable error
+##'
 ##' @param message The error message
+##'
 ##' @export
 ##' @examples
 ##' tryCatch(
@@ -27,7 +29,14 @@ deferrable_error <- function(message) {
 ##' calls that occur.  Ordinary errors will be thrown immediately.
 ##'
 ##' @title Run a block of code, collecting deferrable errors
+##'
 ##' @param expr An expression to evaluate
+##'
+##' @param handler The final handler for the deferred errors.  The
+##'   default is \code{\link{stop}} which will raise the collected
+##'   error.  Alternatively, use \code{\link{return}} to return the
+##'   error
+##'
 ##' @export
 ##' @examples
 ##' check_positive <- function(x) {
@@ -43,7 +52,14 @@ deferrable_error <- function(message) {
 ##'   }),
 ##'   error = identity)
 ##' err
-defer_errors <- function(expr) {
+##'
+##' ## Directly return the error:
+##' err <- defer::defer_errors({
+##'   check_positive(0)
+##'   check_positive(-1)
+##'   check_positive(-2)
+##' }, handler = return)
+defer_errors <- function(expr, handler = stop) {
   errors <- list()
 
   value <- withCallingHandlers(
@@ -53,15 +69,13 @@ defer_errors <- function(expr) {
       invokeRestart("continue_deferrable_error")
     },
     deferred_errors_flush = function(e) {
-      deferred_errors(errors)
+      return(deferred_errors(errors, handler))
     },
     clear_errors = function(e) {
       errors <<- list()
     })
 
-  deferred_errors(errors, value)
-
-  value
+  deferred_errors(errors, handler, value)
 }
 
 
@@ -89,7 +103,7 @@ deferred_errors_flush <- function() {
 }
 
 
-deferred_errors <- function(errors, value = NULL) {
+deferred_errors <- function(errors, handler, value = NULL) {
   if (length(errors) > 0L) {
     errs <- vapply(errors, "[[", character(1), "message")
     msg <- sprintf("%d %s occured:\n%s",
@@ -98,7 +112,9 @@ deferred_errors <- function(errors, value = NULL) {
                    paste0("  - ", errs, collapse = "\n"))
     err <- list(message = msg, errors = errors, value = value)
     class(err) <- c("deferred_errors", "error", "condition")
-    stop(err)
+    handler(err)
+  } else {
+    value
   }
 }
 

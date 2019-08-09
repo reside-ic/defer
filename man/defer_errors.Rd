@@ -4,10 +4,15 @@
 \alias{defer_errors}
 \title{Run a block of code, collecting deferrable errors}
 \usage{
-defer_errors(expr)
+defer_errors(expr, handler = stop)
 }
 \arguments{
 \item{expr}{An expression to evaluate}
+
+\item{handler}{The final handler for the deferred errors.  The
+default is \code{\link{stop}} which will raise the collected
+error.  Alternatively, use \code{\link{return}} to return the
+error}
 }
 \description{
 Run a block of code, collecting any \code{\link{deferrable_error}}
@@ -27,4 +32,11 @@ err <- tryCatch(
   }),
   error = identity)
 err
+
+## Directly return the error:
+err <- defer::defer_errors({
+  check_positive(0)
+  check_positive(-1)
+  check_positive(-2)
+}, handler = return)
 }
