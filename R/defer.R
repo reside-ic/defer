@@ -34,7 +34,7 @@ deferrable_error <- function(message) {
 ##'
 ##' The error object will contain an element \code{errors} with the
 ##' deferred errors, each of which will contain elements
-##' \code{message}, \code{call} (the call that \emph{preceedes}
+##' \code{message}, \code{call} (the call that \emph{precedes}
 ##' \code{deferrable_error} and \code{calls} which contains the
 ##' "interesting" part of the stack trace (i.e., only calls below the
 ##' \code{defer_errors} infrastructure).
@@ -107,7 +107,7 @@ defer_errors <- function(expr, handler = stop) {
 
 ##' Within a \code{\link{defer_errors}} block, flush any deferred
 ##' errors, turning them into realised errors.  If no deferrable
-##' errors have occured, this function has no effect.
+##' errors have occurred, this function has no effect.
 ##' @title Flush deferred errors
 ##' @export
 ##' @examples

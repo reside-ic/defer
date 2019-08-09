@@ -8,9 +8,12 @@ Authors@R: c(person("Rich", "FitzJohn", role = c("aut", "cre"),
 Description: Create errors that can be deferred until later.  With
     deferrable errors, collections of errors that are not immediately
     fatal can be collected and reported back at once.
+URL: https://github.com/mrc-ide/odin
+BugReports: https://github.com/mrc-ide/odin/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests:
     testthat
 RoxygenNote: 6.1.1
+Language: en-GB

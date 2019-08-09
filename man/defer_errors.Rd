@@ -21,7 +21,7 @@ calls that occur.  Ordinary errors will be thrown immediately.
 \details{
 The error object will contain an element \code{errors} with the
 deferred errors, each of which will contain elements
-\code{message}, \code{call} (the call that \emph{preceedes}
+\code{message}, \code{call} (the call that \emph{precedes}
 \code{deferrable_error} and \code{calls} which contains the
 "interesting" part of the stack trace (i.e., only calls below the
 \code{defer_errors} infrastructure).

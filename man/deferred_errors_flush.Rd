@@ -9,7 +9,7 @@ deferred_errors_flush()
 \description{
 Within a \code{\link{defer_errors}} block, flush any deferred
 errors, turning them into realised errors.  If no deferrable
-errors have occured, this function has no effect.
+errors have occurred, this function has no effect.
 }
 \examples{
 check_positive <- function(x) {
