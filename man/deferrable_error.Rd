@@ -13,12 +13,14 @@ deferrable_error(message)
 Create an error that will stop immediately, or can be continued from.
 }
 \examples{
+# Deferrable errors will throw immediately if no suitable calling
+# handlers are established:
 tryCatch(
   deferrable_error("my error"),
   error = identity)
 
-
-# Create a deferrable error and continue from it:
+# Create a deferrable error and continue from it, using
+# withCallingHandlers:
 value <- withCallingHandlers({
    x <- 1
    defer::deferrable_error("a deferrable error")

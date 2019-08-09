@@ -18,6 +18,14 @@ error}
 Run a block of code, collecting any \code{\link{deferrable_error}}
 calls that occur.  Ordinary errors will be thrown immediately.
 }
+\details{
+The error object will contain an element \code{errors} with the
+deferred errors, each of which will contain elements
+\code{message}, \code{call} (the call that \emph{preceedes}
+\code{deferrable_error} and \code{calls} which contains the
+"interesting" part of the stack trace (i.e., only calls below the
+\code{defer_errors} infrastructure).
+}
 \examples{
 check_positive <- function(x) {
   if (x < 0) {
@@ -33,10 +41,24 @@ err <- tryCatch(
   error = identity)
 err
 
-## Directly return the error:
+# Directly return the error:
 err <- defer::defer_errors({
   check_positive(0)
   check_positive(-1)
   check_positive(-2)
 }, handler = return)
+
+# Stack traces are included to improve downstream reporting:
+f <- function(x) {
+  g(x)
+}
+g <- function(x) {
+  check_positive(x)
+}
+err <- defer_errors({
+  f(0)
+  f(-1)
+  f(-2)
+}, handler = return)
+err$errors[[1]]$calls
 }

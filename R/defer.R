@@ -5,12 +5,14 @@
 ##'
 ##' @export
 ##' @examples
+##' # Deferrable errors will throw immediately if no suitable calling
+##' # handlers are established:
 ##' tryCatch(
 ##'   deferrable_error("my error"),
 ##'   error = identity)
 ##'
-##'
-##' # Create a deferrable error and continue from it:
+##' # Create a deferrable error and continue from it, using
+##' # withCallingHandlers:
 ##' value <- withCallingHandlers({
 ##'    x <- 1
 ##'    defer::deferrable_error("a deferrable error")
@@ -19,14 +21,23 @@
 ##'  deferrable_error = function(e)
 ##'    invokeRestart("continue_deferrable_error"))
 deferrable_error <- function(message) {
-  withRestarts(
-    stop(error(message, "deferrable_error")),
-    continue_deferrable_error = function(...) NULL)
+  withRestarts({
+    calls <- sys.calls()
+    call <- calls[[max(length(calls) - 1L, 1L)]]
+    stop(error(message, "deferrable_error", call = call, calls = calls))
+  }, continue_deferrable_error = function(...) NULL)
 }
 
 
 ##' Run a block of code, collecting any \code{\link{deferrable_error}}
 ##' calls that occur.  Ordinary errors will be thrown immediately.
+##'
+##' The error object will contain an element \code{errors} with the
+##' deferred errors, each of which will contain elements
+##' \code{message}, \code{call} (the call that \emph{preceedes}
+##' \code{deferrable_error} and \code{calls} which contains the
+##' "interesting" part of the stack trace (i.e., only calls below the
+##' \code{defer_errors} infrastructure).
 ##'
 ##' @title Run a block of code, collecting deferrable errors
 ##'
@@ -53,12 +64,26 @@ deferrable_error <- function(message) {
 ##'   error = identity)
 ##' err
 ##'
-##' ## Directly return the error:
+##' # Directly return the error:
 ##' err <- defer::defer_errors({
 ##'   check_positive(0)
 ##'   check_positive(-1)
 ##'   check_positive(-2)
 ##' }, handler = return)
+##'
+##' # Stack traces are included to improve downstream reporting:
+##' f <- function(x) {
+##'   g(x)
+##' }
+##' g <- function(x) {
+##'   check_positive(x)
+##' }
+##' err <- defer_errors({
+##'   f(0)
+##'   f(-1)
+##'   f(-2)
+##' }, handler = return)
+##' err$errors[[1]]$calls
 defer_errors <- function(expr, handler = stop) {
   errors <- list()
 
